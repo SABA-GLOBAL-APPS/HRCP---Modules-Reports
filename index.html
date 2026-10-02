@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوابة الموارد البشرية الشاملة | HR Modules Master Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Cairo for Arabic & Inter for English -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html[dir="ltr"] body {
+      font-family: 'Inter', 'Cairo', sans-serif;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .custom-shadow {
+      box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+    }
+    .active-module {
+      border-right: 4px solid #1e40af;
+      background: linear-gradient(90deg, rgba(239, 246, 255, 0.9) 0%, rgba(219, 234, 254, 0.4) 100%);
+    }
+    html[dir="ltr"] .active-module {
+      border-right: none;
+      border-left: 4px solid #1e40af;
+      background: linear-gradient(270deg, rgba(239, 246, 255, 0.9) 0%, rgba(219, 234, 254, 0.4) 100%);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            saba: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+              800: '#1e3a8a',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased flex flex-col h-screen overflow-hidden">
+
+  <!-- Header Bar -->
+  <header class="bg-white border-b border-slate-200 z-30 flex-none h-16 px-4 md:px-6 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <!-- Mobile Sidebar Toggle -->
+      <button id="sidebarToggleBtn" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition focus:outline-none" aria-label="Toggle Menu">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Portal Brand / Logo -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 to-indigo-900 flex items-center justify-center text-white shadow-md font-extrabold text-sm tracking-wider">
+          HR
+        </div>
+        <div>
+          <h1 class="text-base md:text-lg font-bold text-slate-900 leading-tight" id="portalTitle">
+            بوابة إدارة الموارد البشرية الشاملة
+          </h1>
+          <p class="text-xs text-slate-500 font-medium" id="portalSubtitle">
+            11 موديول تدريبي متخصص • دبلوم الموارد البشرية
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Controls (Language, Progress, Actions) -->
+    <div class="flex items-center gap-2 md:gap-4">
+      <!-- Progress Pill Badge -->
+      <div class="hidden sm:flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-full text-xs font-semibold text-blue-800">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-blue-600"></i>
+        <span id="progressText">تم إنجاز 0 من 11</span>
+      </div>
+
+      <!-- Language Toggle Switch -->
+      <button id="langToggleBtn" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs md:text-sm transition-all focus:outline-none">
+        <i data-lucide="languages" class="w-4 h-4 text-blue-600"></i>
+        <span id="langBtnText">English</span>
+      </button>
+
+      <!-- Overview Info Modal Toggle -->
+      <button id="infoModalBtn" class="p-2 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition" title="معلومات الدبلوم">
+        <i data-lucide="help-circle" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace Layout -->
+  <div class="flex flex-1 overflow-hidden relative">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="mobileBackdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
+
+    <!-- Sidebar Modules Navigator -->
+    <aside id="sidebarDrawer" class="fixed inset-y-0 right-0 z-50 w-80 md:w-88 bg-white border-l border-slate-200 flex flex-col transition-all duration-300 transform translate-x-full md:relative md:translate-x-0 md:z-10 shadow-xl md:shadow-none">
+      
+      <!-- Sidebar Header & Search Box -->
+      <div class="p-4 border-b border-slate-200 space-y-3 bg-slate-50/70">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+            <i data-lucide="book-open-check" class="w-4 h-4 text-blue-700"></i>
+            <span id="sidebarHeading">قائمة الموديولات التدريبية</span>
+          </div>
+          <!-- Close button for mobile -->
+          <button id="closeMobileSidebarBtn" class="md:hidden text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Search Modules Field -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="moduleSearchInput" 
+            placeholder="بحث في الموديولات..." 
+            class="w-full pl-9 pr-9 py-2 text-xs md:text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition placeholder-slate-400"
+          />
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute top-2.5 right-3 pointer-events-none" id="searchIcon"></i>
+          <button id="clearSearchBtn" class="absolute top-2.5 left-3 text-slate-400 hover:text-slate-600 hidden">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Completion Progress Bar -->
+        <div>
+          <div class="flex justify-between items-center text-[11px] text-slate-500 font-semibold mb-1">
+            <span id="overallProgressLabel">نسبة التقدم الكلية</span>
+            <span id="overallProgressPercent">0%</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div id="overallProgressBar" class="h-full bg-blue-600 transition-all duration-500 rounded-full" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modules Scrollable List -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2" id="modulesListContainer">
+        <!-- Rendered dynamically through JavaScript -->
+      </div>
+
+      <!-- Sidebar Footer (Quick Links & Actions) -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+        <span id="totalCountBadge">11 موديول متاح</span>
+        <button id="resetProgressBtn" class="text-slate-400 hover:text-rose-600 font-medium transition flex items-center gap-1 text-[11px]">
+          <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+          <span id="resetProgressText">تصفير التقدم</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Stage Area -->
+    <main class="flex-1 flex flex-col bg-slate-100 overflow-hidden relative">
+
+      <!-- Module Top Utility Banner -->
+      <section class="bg-white border-b border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-xs flex-none">
+        
+        <!-- Current Active Module Info -->
+        <div class="flex items-center gap-3">
+          <span id="currentModuleBadge" class="bg-blue-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg tracking-wider shadow-sm">
+            MOD 01
+          </span>
+          <div>
+            <h2 id="currentModuleTitle" class="text-sm md:text-base font-bold text-slate-900 leading-tight">
+              جاري التحميل...
+            </h2>
+            <p id="currentModuleCategory" class="text-[11px] text-slate-500 font-medium">
+              البرنامج التدريبي الشامل
+            </p>
+          </div>
+        </div>
+
+        <!-- Workspace Actions (Next/Prev, Direct Link, Fullscreen, Complete Toggle) -->
+        <div class="flex items-center gap-1.5 md:gap-2">
+          
+          <!-- Mark Completed Button -->
+          <button id="toggleCompleteBtn" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition shadow-xs">
+            <i data-lucide="check" class="w-3.5 h-3.5" id="completeIcon"></i>
+            <span id="completeBtnText">تعليم كمكتمل</span>
+          </button>
+
+          <!-- Reload Frame Button -->
+          <button id="reloadFrameBtn" class="p-2 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition" title="إعادة تحميل الموديول">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Open in New Tab -->
+          <a id="externalLinkBtn" href="#" target="_blank" rel="noopener noreferrer" class="p-2 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition" title="فتح برابط خارجي منفصل">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+
+          <!-- Fullscreen Toggle -->
+          <button id="fullscreenToggleBtn" class="p-2 text-slate-500 hover:text-blue-700 hover:bg-slate-100 rounded-lg transition" title="وضع ملء الشاشة">
+            <i data-lucide="maximize" class="w-4 h-4" id="fullscreenIcon"></i>
+          </button>
+
+          <div class="h-4 w-[1px] bg-slate-200 mx-1 hidden sm:block"></div>
+
+          <!-- Prev/Next Navigation Controls -->
+          <div class="flex items-center gap-1">
+            <button id="prevModuleBtn" class="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-40 disabled:pointer-events-none" title="الموديول السابق">
+              <i data-lucide="chevron-right" class="w-5 h-5 rtl:block ltr:hidden"></i>
+              <i data-lucide="chevron-left" class="w-5 h-5 ltr:block rtl:hidden"></i>
+            </button>
+            <button id="nextModuleBtn" class="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-40 disabled:pointer-events-none" title="الموديول التالي">
+              <i data-lucide="chevron-left" class="w-5 h-5 rtl:block ltr:hidden"></i>
+              <i data-lucide="chevron-right" class="w-5 h-5 ltr:block rtl:hidden"></i>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Interactive Content Frame Area -->
+      <div class="flex-1 w-full h-full relative overflow-hidden bg-slate-900" id="frameWrapper">
+        
+        <!-- Loading State Overlay -->
+        <div id="frameLoader" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-20 transition-opacity duration-300">
+          <div class="relative w-14 h-14 mb-4">
+            <div class="w-14 h-14 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-blue-700 font-bold text-xs">
+              HR
+            </div>
+          </div>
+          <p class="text-sm font-bold text-slate-700" id="loaderTitle">جاري استعراض الموديول التدريبي...</p>
+          <p class="text-xs text-slate-400 mt-1" id="loaderSubtitle">يرجى الانتظار ثوانٍ معدودة</p>
+        </div>
+
+        <!-- Live Module iFrame -->
+        <iframe 
+          id="moduleIframe" 
+          src="about:blank" 
+          class="w-full h-full border-none bg-white relative z-10" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          loading="lazy">
+        </iframe>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Overview / Info Modal Dialog -->
+  <div id="infoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 border border-slate-100">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-blue-50 text-blue-700">
+            <i data-lucide="info" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900" id="modalHeading">حول منصة دبلوم الموارد البشرية</h3>
+        </div>
+        <button id="closeInfoModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs md:text-sm text-slate-600 leading-relaxed" id="modalContentBody">
+        <p>
+          تم تجميع وبرمجة هذه البوابة التفاعلية الموحدة لربط وتصفح كافة المناهج والموديولات الـ 11 المتخصصة في الموارد البشرية المنشورة على GitHub Pages في واجهة واحدة سريعة ومريحة للمتدرب والمحاضر.
+        </p>
+        <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200/80">
+          <div class="font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+            <span id="modalFeaturesTitle">المميزات الرئيسية:</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-600">
+            <li>الانتقال السريع بين الموديولات من القائمة الجانبية بنقرة واحدة.</li>
+            <li>التبديل الفوري بين اللغتين العربية والإنجليزية لكافة عناصر الواجهة.</li>
+            <li>حفظ تقدمك تلقائياً في المتصفح لمتابعة الموديولات التي أنهيتها.</li>
+            <li>إمكانية المشاهدة بوضع الشاشة الكاملة لسهولة القراءة والشرح.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button id="modalOkBtn" class="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs md:text-sm font-bold shadow-md transition">
+          حسناً، فهمت ذلك
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Floating Toast Message -->
+  <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-semibold z-50 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400" id="toastIcon"></i>
+    <span id="toastMsg">تم التحديث بنجاح</span>
+  </div>
+
+  <script>
+    /* Modules Complete Dataset */
+    const modulesData = [
+      {
+        id: 1,
+        code: "MOD 01",
+        titleAr: "مقدمة في الموارد البشرية والاستراتيجية",
+        titleEn: "Introduction to HRM & HR Strategy",
+        categoryAr: "التأسيس الاستراتيجي",
+        categoryEn: "Strategic Foundation",
+        descAr: "فهم فجوة المواءمة الاستراتيجية، إطار POLC، تطور رأس المال البشري، والهرم الاستراتيجي ونموذج SWOT.",
+        descEn: "Understanding strategic alignment gaps, POLC framework, human capital theory, and the Strategic Pyramid.",
+        url: "https://saba-global-apps.github.io/Module1---Intro-to-HRM-Strategy/",
+        icon: "compass"
+      },
+      {
+        id: 2,
+        code: "MOD 02",
+        titleAr: "الاستقطاب والاختيار والتعيين",
+        titleEn: "Recruitment & Talent Selection",
+        categoryAr: "إدارة المواهب",
+        categoryEn: "Talent Acquisition",
+        descAr: "تحليل وتوصيف الوظائف، قنوات الاستقطاب، المقابلات المبنية على الكفاءات، وفلاتر الاختيار الفعالة.",
+        descEn: "Job analysis, recruitment sourcing channels, competency-based interviews, and hiring selection filters.",
+        url: "https://saba-global-apps.github.io/Module-2---Recruitment-Selection/",
+        icon: "user-plus"
+      },
+      {
+        id: 3,
+        code: "MOD 03",
+        titleAr: "قانون العمل والامتثال القانوني",
+        titleEn: "Labor Law & Legal Compliance",
+        categoryAr: "الشؤون القانونية",
+        categoryEn: "Legal Compliance",
+        descAr: "صياغة عقود العمل، الإجازات، التحقيق والجزاءات، وإنهاء خدمة الموظف وفقاً للوائح والقوانين.",
+        descEn: "Employment contracts, statutory leaves, disciplinary procedures, and compliant termination policies.",
+        url: "https://saba-global-apps.github.io/Module-3---Labor-Law-/",
+        icon: "scale"
+      },
+      {
+        id: 4,
+        code: "MOD 04",
+        titleAr: "التأمينات الاجتماعية والرعاية",
+        titleEn: "Social Insurance & Regulations",
+        categoryAr: "الامتثال والتشريعات",
+        categoryEn: "Statutory Regulations",
+        descAr: "الاشتراكات التأمينية، نسب صاحب العمل والعامل، استمارات 1 و2 و6، وإصابات العمل والتقاعد.",
+        descEn: "Social insurance contributions, Form 1, 2, 6 administration, workplace injuries, and retirement schemes.",
+        url: "https://saba-global-apps.github.io/Module-4---Social-Insurance/",
+        icon: "shield-check"
+      },
+      {
+        id: 5,
+        code: "MOD 05",
+        titleAr: "إدارة الأجور والمرتبات وإكسيل للـ HR",
+        titleEn: "Payroll Management & Excel for HR",
+        categoryAr: "العمليات المالية",
+        categoryEn: "HR Operations & Payroll",
+        descAr: "حساب البدلات، الاستقطاعات، ضريبة كسب العمل، شيت المرتبات، ومعادلات إكسيل المتقدمة لشؤون العاملين.",
+        descEn: "Allowance design, gross-to-net payroll formulas, income tax brackets, payslips, and advanced Excel tools.",
+        url: "https://saba-global-apps.github.io/Module-5---Payroll-Management-Excel-for-HR/",
+        icon: "calculator"
+      },
+      {
+        id: 6,
+        code: "MOD 06",
+        titleAr: "إدارة وتقييم الأداء المؤسسي",
+        titleEn: "Performance Management & Appraisals",
+        categoryAr: "تطوير الأداء",
+        categoryEn: "Performance & KPIs",
+        descAr: "بناء مؤشرات الأداء الرئيسية (KPIs)، نماذج التقييم السنوي ونصف السنوي، وتغذية الأداء الراجعة.",
+        descEn: "Crafting measurable KPIs, OKR frameworks, 360 feedback reviews, and constructive appraisal meetings.",
+        url: "https://saba-global-apps.github.io/Module-6---Performance-Management-Appraisals/",
+        icon: "trending-up"
+      },
+      {
+        id: 7,
+        code: "MOD 07",
+        titleAr: "التدريب والتطوير وإدارة المواهب",
+        titleEn: "Training, Development & Talent",
+        categoryAr: "بناء القدرات",
+        categoryEn: "Talent Development",
+        descAr: "تحديد الاحتياجات التدريبية (TNA)، نموذج كيركباتريك لتقييم التدريب، وخطط التعاقب الوظيفي.",
+        descEn: "Training Needs Analysis (TNA), Kirkpatrick evaluation model, learning journeys, and succession planning.",
+        url: "https://saba-global-apps.github.io/Module-7-Training-Development-Talent-Management/",
+        icon: "graduation-cap"
+      },
+      {
+        id: 8,
+        code: "MOD 08",
+        titleAr: "التعويضات والمزايا وأنظمة التحفيز",
+        titleEn: "Compensation, Motivation & Benefits",
+        categoryAr: "المكافآت الإجمالية",
+        categoryEn: "Total Rewards",
+        descAr: "هيكلة الأجور، مصفوفات الترقية، الحوافز المادية والمعنوية، وتحقيق العدالة الداخلية والمنافسة الخارجية.",
+        descEn: "Salary grading structures, comp-ratio analysis, incentive mechanics, health perks, and retention strategy.",
+        url: "https://saba-global-apps.github.io/Module-8-Compensation-Motivation-and-Benefits/",
+        icon: "award"
+      },
+      {
+        id: 9,
+        code: "MOD 09",
+        titleAr: "أسس ومبادئ التطوير التنظيمي",
+        titleEn: "Organizational Development Foundation",
+        categoryAr: "الهيكل والثقافة",
+        categoryEn: "Org Architecture",
+        descAr: "تصميم الهياكل التنظيمية، إدارة التغيير المؤسسي، ومواءمة الثقافة الداخلية مع استراتيجية النمو.",
+        descEn: "Organizational structure design, change management methodologies, cultural transformation, and agility.",
+        url: "https://saba-global-apps.github.io/Module-9-Organizational-Development-Foundation/",
+        icon: "network"
+      },
+      {
+        id: 10,
+        code: "MOD 10",
+        titleAr: "الذكاء الاصطناعي في الموارد البشرية",
+        titleEn: "AI in Human Resources",
+        categoryAr: "المستقبل والابتكار",
+        categoryEn: "Future of Work & AI",
+        descAr: "أدوات الذكاء الاصطناعي التوليدي، تحليل بيانات الكفاءات، وأتمتة المهام اليومية في التوظيف والتطوير.",
+        descEn: "Generative AI applications in HR, people analytics, screening automation, and future digital trends.",
+        url: "https://saba-global-apps.github.io/Module-10---AI/",
+        icon: "bot"
+      },
+      {
+        id: 11,
+        code: "MOD 11",
+        titleAr: "مهارات الأعمال والتطوير المهني",
+        titleEn: "Business Skills & Career Development",
+        categoryAr: "الاحترافية المهنية",
+        categoryEn: "Professional Growth",
+        descAr: "مهارات التفاوض، العرض والتقديم، الذكاء العاطفي، والتخطيط للارتقاء كشريك أعمال استراتيجي (HRBP).",
+        descEn: "Executive presentation, strategic negotiation, emotional intelligence, and transition to HR Business Partner.",
+        url: "https://saba-global-apps.github.io/Module-11---Business-Skills-Career-Development/",
+        icon: "briefcase"
+      }
+    ];
+
+    let currentModuleIndex = 0;
+    let currentLang = 'ar'; // 'ar' or 'en'
+    let completedModules = new Set(JSON.parse(localStorage.getItem('hr_completed_modules') || '[]'));
+
+    const i18n = {
+      ar: {
+        portalTitle: "بوابة إدارة الموارد البشرية الشاملة",
+        portalSubtitle: "11 موديول تدريبي متخصص • دبلوم الموارد البشرية",
+        langBtnText: "English",
+        sidebarHeading: "قائمة الموديولات التدريبية",
+        searchPlaceholder: "بحث في الموديولات...",
+        overallProgressLabel: "نسبة التقدم الكلية",
+        totalCountBadge: "11 موديول متاح",
+        resetProgressText: "تصفير التقدم",
+        markComplete: "تعليم كمكتمل",
+        completed: "مكتمل ✓",
+        moduleBadgePrefix: "موديول",
+        loaderTitle: "جاري استعراض الموديول التدريبي...",
+        loaderSubtitle: "يرجى الانتظار ثوانٍ معدودة",
+        modalHeading: "حول منصة دبلوم الموارد البشرية",
+        modalFeaturesTitle: "المميزات الرئيسية:",
+        resetConfirmToast: "تم تصفير جميع مؤشرات الإنجاز بنجاح",
+        completedToast: "تهانينا! تم وضع علامة إنجاز للموديول",
+        uncompletedToast: "تم إلغاء علامة الإنجاز للموديول",
+        copiedToast: "تم نسخ رابط الموديول إلى الحافظة",
+        progressDone: "تم إنجاز {done} من 11"
+      },
+      en: {
+        portalTitle: "Comprehensive HR Master Portal",
+        portalSubtitle: "11 Professional Modules • Human Resources Diploma",
+        langBtnText: "العربية",
+        sidebarHeading: "Course Modules List",
+        searchPlaceholder: "Search modules...",
+        overallProgressLabel: "Total Completion",
+        totalCountBadge: "11 Modules Available",
+        resetProgressText: "Reset Progress",
+        markComplete: "Mark Complete",
+        completed: "Completed ✓",
+        moduleBadgePrefix: "MODULE",
+        loaderTitle: "Loading interactive module...",
+        loaderSubtitle: "Please wait a moment",
+        modalHeading: "About HR Diploma Portal",
+        modalFeaturesTitle: "Key Features:",
+        resetConfirmToast: "All module progress reset successfully",
+        completedToast: "Awesome! Module marked as completed",
+        uncompletedToast: "Module marked as incomplete",
+        copiedToast: "Module URL copied to clipboard",
+        progressDone: "Completed {done} of 11"
+      }
+    };
+
+    const dom = {
+      modulesContainer: document.getElementById('modulesListContainer'),
+      moduleIframe: document.getElementById('moduleIframe'),
+      frameLoader: document.getElementById('frameLoader'),
+      currentModuleBadge: document.getElementById('currentModuleBadge'),
+      currentModuleTitle: document.getElementById('currentModuleTitle'),
+      currentModuleCategory: document.getElementById('currentModuleCategory'),
+      prevBtn: document.getElementById('prevModuleBtn'),
+      nextBtn: document.getElementById('nextModuleBtn'),
+      toggleCompleteBtn: document.getElementById('toggleCompleteBtn'),
+      completeBtnText: document.getElementById('completeBtnText'),
+      completeIcon: document.getElementById('completeIcon'),
+      reloadBtn: document.getElementById('reloadFrameBtn'),
+      externalLinkBtn: document.getElementById('externalLinkBtn'),
+      fullscreenBtn: document.getElementById('fullscreenToggleBtn'),
+      langToggleBtn: document.getElementById('langToggleBtn'),
+      langBtnText: document.getElementById('langBtnText'),
+      searchInput: document.getElementById('moduleSearchInput'),
+      clearSearchBtn: document.getElementById('clearSearchBtn'),
+      progressText: document.getElementById('progressText'),
+      overallProgressBar: document.getElementById('overallProgressBar'),
+      overallProgressPercent: document.getElementById('overallProgressPercent'),
+      resetProgressBtn: document.getElementById('resetProgressBtn'),
+      sidebarDrawer: document.getElementById('sidebarDrawer'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      closeMobileSidebarBtn: document.getElementById('closeMobileSidebarBtn'),
+      mobileBackdrop: document.getElementById('mobileBackdrop'),
+      infoModal: document.getElementById('infoModal'),
+      infoModalBtn: document.getElementById('infoModalBtn'),
+      closeInfoModalBtn: document.getElementById('closeInfoModalBtn'),
+      modalOkBtn: document.getElementById('modalOkBtn'),
+      toast: document.getElementById('toastNotification'),
+      toastMsg: document.getElementById('toastMsg')
+    };
+
+    function renderSidebar(filteredList = modulesData) {
+      dom.modulesContainer.innerHTML = '';
+
+      if (filteredList.length === 0) {
+        dom.modulesContainer.innerHTML = `
+          <div class="text-center py-8 text-slate-400">
+            <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            <p class="text-xs font-semibold">${currentLang === 'ar' ? 'لا توجد نتائج مطابقة' : 'No modules found'}</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      filteredList.forEach((mod) => {
+        const isActive = modulesData[currentModuleIndex].id === mod.id;
+        const isCompleted = completedModules.has(mod.id);
+        const title = currentLang === 'ar' ? mod.titleAr : mod.titleEn;
+        const category = currentLang === 'ar' ? mod.categoryAr : mod.categoryEn;
+
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border transition-all cursor-pointer relative group flex items-start gap-3 select-none ${
+          isActive 
+            ? 'active-module border-blue-200 shadow-sm' 
+            : 'bg-white hover:bg-slate-50 border-slate-200/70 hover:border-slate-300'
+        }`;
+
+        card.innerHTML = `
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-none font-bold text-xs ${
+            isCompleted 
+              ? 'bg-emerald-500 text-white' 
+              : isActive 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-slate-100 text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-700'
+          } transition-colors">
+            ${isCompleted ? '<i data-lucide="check" class="w-4 h-4"></i>' : mod.id}
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1 mb-0.5">
+              <span class="text-[10px] uppercase font-bold tracking-wider ${isActive ? 'text-blue-700' : 'text-slate-400'}">
+                ${mod.code}
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+                ${category}
+              </span>
+            </div>
+            <h4 class="text-xs font-bold leading-snug line-clamp-2 ${isActive ? 'text-blue-900 font-extrabold' : 'text-slate-800'}">
+              ${title}
+            </h4>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          const targetIndex = modulesData.findIndex(m => m.id === mod.id);
+          if (targetIndex !== -1) {
+            selectModule(targetIndex);
+            closeMobileSidebar();
+          }
+        });
+
+        dom.modulesContainer.appendChild(card);
+      });
+
+      lucide.createIcons();
+      updateProgressMetrics();
+    }
+
+    function selectModule(index) {
+      if (index < 0 || index >= modulesData.length) return;
+      currentModuleIndex = index;
+      const mod = modulesData[index];
+
+      // Update Header info
+      dom.currentModuleBadge.textContent = mod.code;
+      dom.currentModuleTitle.textContent = currentLang === 'ar' ? mod.titleAr : mod.titleEn;
+      dom.currentModuleCategory.textContent = currentLang === 'ar' ? mod.categoryAr : mod.categoryEn;
+
+      // Update external link
+      dom.externalLinkBtn.href = mod.url;
+
+      // Update complete button appearance
+      updateCompleteButtonState();
+
+      // Update prev / next state
+      dom.prevBtn.disabled = currentModuleIndex === 0;
+      dom.nextBtn.disabled = currentModuleIndex === modulesData.length - 1;
+
+      // Load iFrame with loader
+      showLoader();
+      dom.moduleIframe.src = mod.url;
+
+      // Re-render sidebar to highlight active item
+      renderSidebar();
+    }
+
+    function showLoader() {
+      dom.frameLoader.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function hideLoader() {
+      dom.frameLoader.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    dom.moduleIframe.addEventListener('load', () => {
+      // Delay slightly for smooth transition
+      setTimeout(hideLoader, 350);
+    });
+
+    function updateCompleteButtonState() {
+      const modId = modulesData[currentModuleIndex].id;
+      const isDone = completedModules.has(modId);
+
+      if (isDone) {
+        dom.toggleCompleteBtn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition shadow-xs";
+        dom.completeBtnText.textContent = i18n[currentLang].completed;
+        dom.completeIcon.setAttribute('data-lucide', 'check-circle-2');
+      } else {
+        dom.toggleCompleteBtn.className = "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition shadow-xs";
+        dom.completeBtnText.textContent = i18n[currentLang].markComplete;
+        dom.completeIcon.setAttribute('data-lucide', 'circle');
+      }
+      lucide.createIcons();
+    }
+
+    function toggleCurrentModuleComplete() {
+      const modId = modulesData[currentModuleIndex].id;
+      if (completedModules.has(modId)) {
+        completedModules.delete(modId);
+        showToast(i18n[currentLang].uncompletedToast, 'info');
+      } else {
+        completedModules.add(modId);
+        showToast(i18n[currentLang].completedToast, 'success');
+      }
+      localStorage.setItem('hr_completed_modules', JSON.stringify([...completedModules]));
+      updateCompleteButtonState();
+      renderSidebar();
+    }
+
+    function updateProgressMetrics() {
+      const count = completedModules.size;
+      const total = modulesData.length;
+      const percent = Math.round((count / total) * 100);
+
+      dom.progressText.textContent = i18n[currentLang].progressDone.replace('{done}', count);
+      dom.overallProgressPercent.textContent = `${percent}%`;
+      dom.overallProgressBar.style.width = `${percent}%`;
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const root = document.documentElement;
+      const t = i18n[lang];
+
+      if (lang === 'ar') {
+        root.setAttribute('lang', 'ar');
+        root.setAttribute('dir', 'rtl');
+        document.body.classList.remove('font-sans');
+      } else {
+        root.setAttribute('lang', 'en');
+        root.setAttribute('dir', 'ltr');
+      }
+
+      // Update static UI strings
+      document.getElementById('portalTitle').textContent = t.portalTitle;
+      document.getElementById('portalSubtitle').textContent = t.portalSubtitle;
+      document.getElementById('sidebarHeading').textContent = t.sidebarHeading;
+      document.getElementById('moduleSearchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('overallProgressLabel').textContent = t.overallProgressLabel;
+      document.getElementById('totalCountBadge').textContent = t.totalCountBadge;
+      document.getElementById('resetProgressText').textContent = t.resetProgressText;
+      document.getElementById('loaderTitle').textContent = t.loaderTitle;
+      document.getElementById('loaderSubtitle').textContent = t.loaderSubtitle;
+      document.getElementById('modalHeading').textContent = t.modalHeading;
+      document.getElementById('modalFeaturesTitle').textContent = t.modalFeaturesTitle;
+      dom.langBtnText.textContent = t.langBtnText;
+
+      // Update current selected module titles
+      const mod = modulesData[currentModuleIndex];
+      dom.currentModuleTitle.textContent = lang === 'ar' ? mod.titleAr : mod.titleEn;
+      dom.currentModuleCategory.textContent = lang === 'ar' ? mod.categoryAr : mod.categoryEn;
+
+      updateCompleteButtonState();
+      renderSidebar();
+    }
+
+    function toggleLanguage() {
+      setLanguage(currentLang === 'ar' ? 'en' : 'ar');
+    }
+
+    let toastTimeout;
+    function showToast(message, type = 'success') {
+      clearTimeout(toastTimeout);
+      dom.toastMsg.textContent = message;
+      
+      const icon = document.getElementById('toastIcon');
+      if (type === 'success') {
+        icon.className = 'w-4 h-4 text-emerald-400';
+      } else {
+        icon.className = 'w-4 h-4 text-blue-400';
+      }
+
+      dom.toast.classList.remove('translate-y-20', 'opacity-0');
+      dom.toast.classList.add('translate-y-0', 'opacity-100');
+
+      toastTimeout = setTimeout(() => {
+        dom.toast.classList.add('translate-y-20', 'opacity-0');
+        dom.toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    function openMobileSidebar() {
+      dom.mobileBackdrop.classList.remove('hidden');
+      setTimeout(() => {
+        dom.mobileBackdrop.classList.remove('opacity-0');
+        dom.mobileBackdrop.classList.add('opacity-100');
+        dom.sidebarDrawer.classList.remove('translate-x-full');
+      }, 10);
+    }
+
+    function closeMobileSidebar() {
+      dom.sidebarDrawer.classList.add('translate-x-full');
+      dom.mobileBackdrop.classList.remove('opacity-100');
+      dom.mobileBackdrop.classList.add('opacity-0');
+      setTimeout(() => {
+        dom.mobileBackdrop.classList.add('hidden');
+      }, 300);
+    }
+
+    // Search Listener
+    dom.searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (q) {
+        dom.clearSearchBtn.classList.remove('hidden');
+        const filtered = modulesData.filter(m => 
+          m.titleAr.toLowerCase().includes(q) || 
+          m.titleEn.toLowerCase().includes(q) || 
+          m.descAr.toLowerCase().includes(q) || 
+          m.descEn.toLowerCase().includes(q) ||
+          m.code.toLowerCase().includes(q)
+        );
+        renderSidebar(filtered);
+      } else {
+        dom.clearSearchBtn.classList.add('hidden');
+        renderSidebar();
+      }
+    });
+
+    dom.clearSearchBtn.addEventListener('click', () => {
+      dom.searchInput.value = '';
+      dom.clearSearchBtn.classList.add('hidden');
+      renderSidebar();
+    });
+
+    // Next / Prev Actions
+    dom.prevBtn.addEventListener('click', () => selectModule(currentModuleIndex - 1));
+    dom.nextBtn.addEventListener('click', () => selectModule(currentModuleIndex + 1));
+
+    // Reload Frame
+    dom.reloadBtn.addEventListener('click', () => {
+      showLoader();
+      dom.moduleIframe.src = modulesData[currentModuleIndex].url;
+    });
+
+    // Toggle Complete
+    dom.toggleCompleteBtn.addEventListener('click', toggleCurrentModuleComplete);
+
+    // Language Toggle
+    dom.langToggleBtn.addEventListener('click', toggleLanguage);
+
+    // Fullscreen Toggle
+    dom.fullscreenBtn.addEventListener('click', () => {
+      const elem = document.getElementById('frameWrapper');
+      if (!document.fullscreenElement) {
+        if (elem.requestFullscreen) elem.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+
+    // Reset Progress
+    dom.resetProgressBtn.addEventListener('click', () => {
+      completedModules.clear();
+      localStorage.removeItem('hr_completed_modules');
+      updateProgressMetrics();
+      updateCompleteButtonState();
+      renderSidebar();
+      showToast(i18n[currentLang].resetConfirmToast, 'info');
+    });
+
+    // Mobile Drawer
+    dom.sidebarToggleBtn.addEventListener('click', openMobileSidebar);
+    dom.closeMobileSidebarBtn.addEventListener('click', closeMobileSidebar);
+    dom.mobileBackdrop.addEventListener('click', closeMobileSidebar);
+
+    // Info Modal
+    dom.infoModalBtn.addEventListener('click', () => dom.infoModal.classList.remove('hidden'));
+    dom.closeInfoModalBtn.addEventListener('click', () => dom.infoModal.classList.add('hidden'));
+    dom.modalOkBtn.addEventListener('click', () => dom.infoModal.classList.add('hidden'));
+
+    // Keyboard Shortcuts (Left / Right keys to navigate)
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement.tagName === 'INPUT') return;
+      if (e.key === 'ArrowLeft') {
+        if (currentLang === 'ar') selectModule(currentModuleIndex + 1);
+        else selectModule(currentModuleIndex - 1);
+      } else if (e.key === 'ArrowRight') {
+        if (currentLang === 'ar') selectModule(currentModuleIndex - 1);
+        else selectModule(currentModuleIndex + 1);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      selectModule(0);
+      renderSidebar();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
